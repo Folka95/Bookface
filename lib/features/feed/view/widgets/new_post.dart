@@ -1,10 +1,8 @@
-import 'package:blog_app/shared/models/post_model.dart';
-import 'package:blog_app/shared/models/post_topics.dart';
 import 'package:flutter/material.dart';
 
 class NewPost extends StatefulWidget {
   final String userId;
-  final void Function(Post post, String userId) onSubmit;
+  final void Function(String content, String userId) onSubmit;
 
   const NewPost({super.key, required this.userId, required this.onSubmit});
 
@@ -51,19 +49,7 @@ class _NewPostState extends State<NewPost> {
                 if (content.isEmpty) {
                   return;
                 }
-                widget.onSubmit(
-                  Post(
-                    id: 'post_${DateTime.now().millisecondsSinceEpoch}',
-                    authorId: widget.userId,
-                    content: content,
-                    images: [],
-                    topics: [Topics().personal],
-                    views: 0,
-                    likes: 0,
-                    comments: 0,
-                  ),
-                  widget.userId,
-                );
+                widget.onSubmit(content, widget.userId);
                 contentController.clear();
                 FocusScope.of(context).unfocus();
               },

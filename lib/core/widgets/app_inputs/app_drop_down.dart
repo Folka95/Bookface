@@ -15,7 +15,7 @@ class DropDownItem<T> {
 class AppDropDown<T> extends StatefulWidget {
   final void Function(T) onSelectionChanged;
   final List<DropDownItem<T>> items;
-  final String? Function(int?)? validator;
+  final String error;
 
   int? selectedIndex;
 
@@ -24,7 +24,7 @@ class AppDropDown<T> extends StatefulWidget {
     required this.onSelectionChanged,
     required this.items,
     required T? selectedItem,
-    this.validator,
+    required this.error,
   }) {
     for (int i = 0; i < items.length; i++) {
       if (selectedItem == items[i].value) {
@@ -39,7 +39,6 @@ class AppDropDown<T> extends StatefulWidget {
 }
 
 class _AppDropDownState<T> extends State<AppDropDown<T>> {
-
   void _selectItem(int idx) {
     if (widget.items.isEmpty) {
       return;
@@ -64,10 +63,10 @@ class _AppDropDownState<T> extends State<AppDropDown<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final hasError = widget.error.isNotEmpty;
+
     return DropdownButtonFormField<int>(
       value: widget.selectedIndex,
-
-      validator: widget.validator,
 
       dropdownColor: const Color(0xFFFFFFFF),
 
@@ -75,30 +74,47 @@ class _AppDropDownState<T> extends State<AppDropDown<T>> {
         color: Color(0xFF201C18),
       ),
 
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         filled: true,
-        fillColor: Color(0xFFFFFFFF),
+        fillColor: const Color(0xFFFFFFFF),
 
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(15),
+          borderRadius: BorderRadius.circular(15),
+        ),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color: hasError ? Colors.red : Colors.grey,
+          ),
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color: hasError ? Colors.red : Colors.black,
+            width: 2,
           ),
         ),
 
         errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
             color: Colors.red,
           ),
         ),
 
         focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Color(0xFFE4DFD8),
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Colors.red,
             width: 2,
           ),
         ),
 
-        suffixIcon: Icon(
+        errorText: hasError ? widget.error : null,
+
+        suffixIcon: const Icon(
           Icons.keyboard_arrow_down,
           color: Colors.black,
         ),
@@ -117,7 +133,6 @@ class _AppDropDownState<T> extends State<AppDropDown<T>> {
                   item.prefixImg!,
                   const SizedBox(width: 10),
                 ],
-
                 Text(
                   _limitString(item.name),
                   maxLines: 1,

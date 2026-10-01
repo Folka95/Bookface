@@ -8,9 +8,13 @@ final class FeedInitial extends FeedState {}
 final class FeedLoading extends FeedState {}
 
 final class FeedLoaded extends FeedState {
+  final String? userId;
   final List<Feed> feeds;
 
-  FeedLoaded({required this.feeds});
+  FeedLoaded({
+    required this.userId,
+    required this.feeds,
+  });
 }
 
 final class FeedFailure extends FeedState {

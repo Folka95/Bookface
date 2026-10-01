@@ -6,6 +6,7 @@ import 'package:blog_app/core/storage/user_cache.dart';
 import 'package:blog_app/core/storage/user_data_cache.dart';
 import 'package:blog_app/shared/data/gender_data.dart';
 import 'package:blog_app/shared/data/interests_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
@@ -27,22 +28,27 @@ class LoginCubit extends Cubit<LoginState> {
         email: email,
         password: password,
       );
-      final user = MyUser(id: credential.user!.uid);
 
-      await UserCache.save(user);
-      await UserDataCache.save(
-        MyUserData(
-          email: credential.user!.email,
-          name: "Mohamed Khaled",
-          about: "I love programing!",
-          gender: Genders.male,
-          nationality: "Egypt",
-          birthdate: DateTime(31, 12, 2000),
-          createdAt: DateTime(15, 3, 2018),
-          lastActive: DateTime.now(),
-          interests: const [Interests.gaming, Interests.programming],
-        ),
+
+      final db = FirebaseFirestore.instance;
+
+      final doc = await db
+          .collection("users")
+          .doc(credential.user!.uid)
+          .get();
+
+      if (!doc.exists || doc.data() == null) {
+        emit(LoginFailure(message: "No user data found"));
+        return;
+      }
+
+      final data = MyUserData.fromJson(
+        doc.data()!,
       );
+
+      final user = MyUser(id: credential.user!.uid);
+      await UserDataCache.save(data);
+      await UserCache.save(user);
 
       emit(LoginSuccess());
     } on FirebaseAuthException catch (e) {
@@ -59,35 +65,5 @@ class LoginCubit extends Cubit<LoginState> {
   signinWithGoogle() async {
     emit(LoginFailure(message: "Currently unavailable"));
     return;
-    emit(LoginLoading());
-    try {
-      // Trigger the authentication flow
-      final GoogleSignInAccount googleUser = await GoogleSignIn.instance
-          .authenticate();
-
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
-
-      // Once signed in, return the UserCredential
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(
-        credential,
-      );
-
-      safePrint(userCredential.user!.uid);
-      emit(LoginSuccess());
-    } on FirebaseAuthException catch (e) {
-      safePrint(e.code);
-      if (e.code == 'invalid-email') {
-        safePrint('Invalid email.');
-      } else if (e.code == 'weak-password') {
-        safePrint('Weak password.');
-      }
-      emit(LoginFailure(message: e.code));
-    }
   }
 }

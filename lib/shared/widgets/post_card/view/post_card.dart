@@ -38,12 +38,7 @@ class PostCard extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              Text(post.content+post.content+post.content, style: Theme.of(context).textTheme.bodyLarge),
-
-              if (post.images.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                _buildImages(),
-              ],
+              Text(post.content, style: Theme.of(context).textTheme.bodyLarge),
 
               const SizedBox(height: 16),
 
@@ -62,7 +57,7 @@ class PostCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundImage: authorImage != null
+            backgroundImage: authorImage != null && authorImage!.isNotEmpty
                 ? NetworkImage(authorImage!)
                 : null,
             child: authorImage == null
@@ -83,40 +78,6 @@ class PostCard extends StatelessWidget {
 
           IconButton(onPressed: null, icon: const Icon(Icons.more_vert)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildImages() {
-    if (post.images.length == 1) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Image.network(post.images.first, fit: BoxFit.cover),
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: post.images.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.only(
-              right: index == post.images.length - 1 ? 0 : 8,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: Image.network(post.images[index], fit: BoxFit.cover),
-              ),
-            ),
-          );
-        },
       ),
     );
   }

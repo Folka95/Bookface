@@ -55,22 +55,19 @@ class UserDataPage extends StatelessWidget {
             );
           }
           if (state is UserDataCompleted) {
-            for(int i = 1; i < 100000000; i++) {
-
-            }
             AppMessage.show(
               context,
               message: "Profile completed, you can login now!",
               type: AppMessageType.success,
             );
             Navigator.pop(context);
-            // Navigator.pushAndRemoveUntil(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => LoginScreen(),
-            //   ),
-            //       (route) => false,
-            // );
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LoginScreen(),
+              ),
+                  (route) => false,
+            );
           }
           if (state is UserDataSaved) {
             Navigator.pop(context);

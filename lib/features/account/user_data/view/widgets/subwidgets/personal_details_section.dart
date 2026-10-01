@@ -1,42 +1,37 @@
-import 'dart:io';
-
-import 'package:blog_app/core/helpers/safe_print.dart';
-import 'package:blog_app/core/helpers/validators.dart';
-import 'package:blog_app/core/models/user_data.dart';
-import 'package:blog_app/core/storage/user_cache.dart';
-import 'package:blog_app/core/storage/user_data_cache.dart';
-import 'package:blog_app/features/account/user_data/view/widgets/subwidgets/input/app_interests_selector.dart';
 import 'package:blog_app/core/widgets/app_inputs/app_date_picker.dart';
 import 'package:blog_app/core/widgets/app_inputs/app_drop_down.dart';
-import 'package:blog_app/core/widgets/app_inputs/app_form_field.dart';
-import 'package:blog_app/core/widgets/app_inputs/app_image_picker.dart';
 import 'package:blog_app/features/account/user_data/view/widgets/subwidgets/input/app_gender_selector.dart';
-import 'package:blog_app/features/account/user_data/manager/user_data_cubit.dart';
 import 'package:blog_app/shared/data/gender_data.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:world_flags/world_flags.dart';
-
 
 class UserDataFormPersonalDetailsSection extends StatelessWidget {
   final void Function(DateTime?) onBirthdateChanged;
   final void Function(GenderItem?) onGenderChanged;
   final void Function(String) onNationalityChanged;
 
-  DateTime? birthdate;
-  GenderItem? gender;
-  String nationality;
+  final String birthdateError;
+  final String genderError;
+  final String nationalityError;
+
+  final DateTime? birthdate;
+  final GenderItem? gender;
+  final String nationality;
 
   final double itemSpacing;
   final double subinfoFontSize;
   final double sectionFontSize;
   final double fieldFontSize;
 
-  UserDataFormPersonalDetailsSection({
+  const UserDataFormPersonalDetailsSection({
+    super.key,
     required this.onBirthdateChanged,
     required this.onGenderChanged,
     required this.onNationalityChanged,
+
+    required this.birthdateError,
+    required this.genderError,
+    required this.nationalityError,
 
     required this.birthdate,
     required this.gender,
@@ -48,14 +43,11 @@ class UserDataFormPersonalDetailsSection extends StatelessWidget {
     required this.sectionFontSize,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: itemSpacing,
-
-
       children: [
         Text(
           'PERSONAL DETAILS',
@@ -64,6 +56,7 @@ class UserDataFormPersonalDetailsSection extends StatelessWidget {
             color: Color(0xFF8A8177),
           ),
         ),
+
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -77,6 +70,7 @@ class UserDataFormPersonalDetailsSection extends StatelessWidget {
             AppDatePicker(
               onBirthdateChanged: onBirthdateChanged,
               selectedDate: birthdate,
+              error: birthdateError,
             ),
           ],
         ),
@@ -98,9 +92,11 @@ class UserDataFormPersonalDetailsSection extends StatelessWidget {
                 AppGenderSelector(
                   onGenderChanged: onGenderChanged,
                   selectedGender: gender,
-                )
+                  error: genderError,
+                ),
               ],
             ),
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -115,7 +111,8 @@ class UserDataFormPersonalDetailsSection extends StatelessWidget {
                   onSelectionChanged: onNationalityChanged,
                   items: _getCountryItems(),
                   selectedItem: nationality,
-                )
+                  error: nationalityError,
+                ),
               ],
             ),
           ],
@@ -123,6 +120,7 @@ class UserDataFormPersonalDetailsSection extends StatelessWidget {
       ],
     );
   }
+
   List<DropDownItem<String>> _getCountryItems() {
     const _items = <IsoTranslated, BasicFlag>{
       ...smallSimplifiedFlagsMap,
@@ -146,7 +144,7 @@ class UserDataFormPersonalDetailsSection extends StatelessWidget {
     })
         .toList()
       ..sort((a, b) => a.name.compareTo(b.name));
+
     return countryValues;
   }
 }
-

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 String _dateFormater(DateTime? date) {
-  if(date == null) {
+  if (date == null) {
     return "";
   }
+
   final Map<int, String> months = {
     1: 'January',
     2: 'February',
@@ -18,43 +19,63 @@ String _dateFormater(DateTime? date) {
     11: 'November',
     12: 'December',
   };
-  return date.day.toString() + ' ' + months[date.month]! + ' ' + date.year.toString();
+
+  return '${date.day} ${months[date.month]!} ${date.year}';
 }
 
 class AppDatePicker extends StatefulWidget {
   final void Function(DateTime?) onBirthdateChanged;
-  final String? Function(String?)? validator;
+
+  final String error;
 
   DateTime? selectedDate;
 
   TextEditingController textController = TextEditingController();
 
   AppDatePicker({
+    super.key,
     required this.onBirthdateChanged,
+    required this.error,
     required this.selectedDate,
-    this.validator,
   }) {
     onBirthdateChanged(selectedDate);
-    textController = TextEditingController(text: _dateFormater(selectedDate));
+    textController = TextEditingController(
+      text: _dateFormater(selectedDate),
+    );
   }
 
   @override
-  _AppDatePickerState createState() => _AppDatePickerState();
+  State<AppDatePicker> createState() => _AppDatePickerState();
 }
 
 class _AppDatePickerState extends State<AppDatePicker> {
   Future<void> _selectDate(BuildContext context) async {
-    DateTime today = DateTime.now();
+    final today = DateTime.now();
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate:
-      widget.selectedDate,
-      firstDate: DateTime(today.year - 100, today.month, today.day),
-      lastDate: DateTime(today.year - 18, today.month, today.day),
+      initialDate: widget.selectedDate ??
+          DateTime(
+            today.year - 18,
+            today.month,
+            today.day,
+          ),
+      firstDate: DateTime(
+        today.year - 100,
+        today.month,
+        today.day,
+      ),
+      lastDate: DateTime(
+        today.year - 18,
+        today.month,
+        today.day,
+      ),
     );
+
     if (picked != null) {
       widget.textController.text = _dateFormater(picked);
       widget.onBirthdateChanged(picked);
+
       setState(() {
         widget.selectedDate = picked;
       });
@@ -63,30 +84,64 @@ class _AppDatePickerState extends State<AppDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final hasError = widget.error.isNotEmpty;
+
     return TextFormField(
       controller: widget.textController,
-      validator: widget.validator,
       readOnly: true,
       maxLines: 1,
       onTap: () {
         _selectDate(context);
       },
-      style: TextStyle(color: Color(0xFF201C18)),
-
+      style: const TextStyle(
+        color: Color(0xFF201C18),
+      ),
       decoration: InputDecoration(
-        hint: Text("pick your birthdate"),
+        hintText: "pick your birthdate",
+
         filled: true,
-        fillColor: Color(0xFFFFFFFF),
-        border: const OutlineInputBorder(),
-        errorBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.all(Radius.circular(15)),
-        ),
-        focusedErrorBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red, width: 2),
+        fillColor: const Color(0xFFFFFFFF),
+
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
         ),
 
-        suffixIcon: Icon(Icons.calendar_today_outlined),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color: hasError ? Colors.red : Colors.grey,
+          ),
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(
+            color: hasError ? Colors.red : Colors.black,
+            width: 2,
+          ),
+        ),
+
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Colors.red,
+          ),
+        ),
+
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 2,
+          ),
+        ),
+
+        // Flutter displays this below the field.
+        errorText: hasError ? widget.error : null,
+
+        suffixIcon: const Icon(
+          Icons.calendar_today_outlined,
+        ),
       ),
     );
   }

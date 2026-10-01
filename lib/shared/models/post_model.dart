@@ -1,34 +1,72 @@
-import 'package:blog_app/shared/models/post_topics.dart';
+class Comment {
+  final String userId;
+  final String content;
+
+  Comment({
+    required this.userId,
+    required this.content,
+  });
+
+  factory Comment.fromJson(Map<String, dynamic> json) {
+    return Comment(
+      userId: json['userId'] as String,
+      content: json['content'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'content': content,
+    };
+  }
+}
 
 class Post {
   final String id;
   final String authorId;
   final String content;
-  final List<String> images;
-  final List<Topic> topics;
-  final int views;
   final int likes;
-  final int comments;
+  final List<Comment> comments;
 
   Post({
     required this.id,
     required this.authorId,
     required this.content,
-    required this.images,
-    required this.topics,
-    required this.views,
     required this.likes,
     required this.comments,
   });
 
-  Post copyWith({int? views, int? likes, int? comments}) {
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      id: json['id'] as String,
+      authorId: json['authorId'] as String,
+      content: json['content'] as String,
+      likes: json['likes'] as int,
+      comments: (json['comments'] as List<dynamic>)
+          .map((comment) => Comment.fromJson(comment as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'authorId': authorId,
+      'content': content,
+      'likes': likes,
+      'comments': comments.map((comment) => comment.toJson()).toList(),
+    };
+  }
+
+  Post copyWith({
+    int? likes,
+    List<Comment>? comments,
+  }) {
     return Post(
       id: id,
       authorId: authorId,
       content: content,
-      images: images,
-      topics: topics,
-      views: views ?? this.views,
       likes: likes ?? this.likes,
       comments: comments ?? this.comments,
     );
